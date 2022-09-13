@@ -1,0 +1,6 @@
+[submodule "Engine/3rdParty/libSDL2pp"]
+	path = Engine/3rdParty/libSDL2pp
+	url = https://github.com/libSDL2pp/libSDL2pp.git
+[submodule "Engine/3rdParty/SDL2"]
+	path = Engine/3rdParty/SDL2
+	url = https://github.com/libsdl-org/SDL.git
