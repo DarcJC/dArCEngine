@@ -46,6 +46,8 @@ void darc::IPlatformApplication::start() {
         return;
     }
 
+    SDL_SetMainReady();
+
     // do tick
     while (is_running) {
         tick();

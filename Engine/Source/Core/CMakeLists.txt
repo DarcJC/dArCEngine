@@ -13,7 +13,8 @@ source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${HEADER_FILES} ${SOURCE_F
 add_executable(${TARGET_NAME} ${HEADER_FILES} ${SOURCE_FILES})
 
 add_dependencies(${TARGET_NAME} dArCRuntime SDL2)
-target_link_libraries(${TARGET_NAME} ${SDL2_LIBRARIES})
+include_directories(${ENGINE_RUNTIME_DIR})
+target_link_libraries(${TARGET_NAME} ${SDL2_LIBRARIES} ${ENGINE_RUNTIME_LIBRARY})
 
 set_target_properties(${TARGET_NAME} PROPERTIES CXX_STANDARD 23)
 set_target_properties(${TARGET_NAME} PROPERTIES FOLDER "Engine")
