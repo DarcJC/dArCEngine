@@ -14,6 +14,10 @@ set(CMAKE_INSTALL_PREFIX "${PROJECT_ROOT_DIR}/bin")
 set(BINARY_ROOT_DIR "${CMAKE_INSTALL_PREFIX}/")
 set(GLOBAL_OUTPUT_PATH ${BINARY_ROOT_DIR})
 
+add_compile_definitions(
+        $<$<CONFIG:DEBUG>:ENABLE_VALIDATION_LAYER=1>
+)
+
 link_directories(${GLOBAL_OUTPUT_PATH})
 
 add_subdirectory(Engine)

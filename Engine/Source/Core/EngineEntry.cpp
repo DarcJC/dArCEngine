@@ -1,9 +1,8 @@
 #define SDL_MAIN_HANDLED
 #include "spdlog/spdlog.h"
 #include "Platform/IPlatformApplication.h"
-#include "Engine.h"
 
-int main() {
+int main(int argc, char* argv[]) {
     spdlog::info(R"(
     ###     ##                ####   #######                      ##
      ##    ####              ##  ##   ##   #
@@ -14,8 +13,6 @@ int main() {
   ######  ##  ##   ####       ####   #######  ##  ##       ##    ####    ##  ##    #####
                                                        #####
     )");
-
-    spdlog::info("test: {}", test());
 
     auto app = darc::IPlatformApplication::Get();
 
