@@ -11,5 +11,11 @@ endif()
 include_directories(3rdParty/include)
 include(3rdParty/SDL2.cmake)
 
+# Import vulkan
+find_package(Vulkan REQUIRED FATAL_ERROR)
+include_directories(${Vulkan_INCLUDE_DIRS})
+link_libraries(${Vulkan_LIBRARIES})
+message(STATUS "Vulkan Includes: ${Vulkan_INCLUDE_DIRS}, Link: ${Vulkan_LIBRARIES}")
+
 add_subdirectory(Source/Runtime)
 add_subdirectory(Source/Core)

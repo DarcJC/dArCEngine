@@ -48,6 +48,8 @@ void darc::IPlatformApplication::start() {
 
     SDL_SetMainReady();
 
+    rhi.Init();
+
     // do tick
     while (is_running) {
         tick();

@@ -1,3 +1,3 @@
 #pragma once
 
-#include "LLAL/PlatformType.h"
+#include "LLAL/Platform.h"

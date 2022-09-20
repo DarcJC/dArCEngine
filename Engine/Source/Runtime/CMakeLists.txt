@@ -21,12 +21,6 @@ add_library(${TARGET_NAME} ${HEADER_FILES} ${SOURCE_FILES})
 add_dependencies(${TARGET_NAME} SDL2)
 target_link_libraries(${TARGET_NAME} ${SDL2_LIBRARIES})
 
-# Import vulkan
-find_package(Vulkan REQUIRED FATAL_ERROR)
-target_include_directories(${TARGET_NAME} PUBLIC ${Vulkan_INCLUDE_DIRS})
-target_link_libraries (${TARGET_NAME} ${Vulkan_LIBRARIES})
-message(STATUS "includes: ${Vulkan_INCLUDE_DIRS}, ${Vulkan_LIBRARIES}")
-
 # Setup property
 set_target_properties(${TARGET_NAME} PROPERTIES CXX_STANDARD 23)
 set_target_properties(${TARGET_NAME} PROPERTIES FOLDER "Engine")

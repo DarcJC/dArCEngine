@@ -27,12 +27,12 @@ struct GenericPlatformType {
     typedef signed long long i64;
 
     // Arch & Platform specific
-    typedef unsigned long usize;
-    typedef signed long isize;
+//    typedef unsigned long usize;
+//    typedef signed long isize;
 
     typedef SelectIntPointerType<u32, u64, sizeof(void*)>::TIntPointer uptr;
     typedef SelectIntPointerType<i32, i64, sizeof(void*)>::TIntPointer iptr;
-    typedef uptr size_t;
-    typedef iptr sszie_t;
+    typedef uptr usize;
+    typedef iptr isize;
 
 };

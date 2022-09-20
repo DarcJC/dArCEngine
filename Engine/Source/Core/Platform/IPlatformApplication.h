@@ -2,6 +2,7 @@
 #include <string>
 #include <memory>
 #include "SDL.h"
+#include "Core/RHIWrapper/Vulkan/VulkanDynamicRHI.h"
 
 namespace darc {
     class IPlatformApplication {
@@ -9,6 +10,7 @@ namespace darc {
         std::string name_;
         SDL_Window* main_window_ = nullptr;
         bool is_running = true;
+        VulkanDynamicRHI rhi;
 
     public:
         explicit IPlatformApplication(std::string&& name) : name_(name) {};
