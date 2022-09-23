@@ -7,7 +7,7 @@ struct AssertWrapper {
 };
 
 template<typename... Args>
-inline void ensure(bool exp, spdlog::format_string_t<Args...> fmt, Args &&... args) {
+TRYINLINE void ensure(bool exp, spdlog::format_string_t<Args...> fmt, Args &&... args) {
     [[unlikely]]
     if (!exp) {
         spdlog::error(fmt, std::forward<Args>(args)...);

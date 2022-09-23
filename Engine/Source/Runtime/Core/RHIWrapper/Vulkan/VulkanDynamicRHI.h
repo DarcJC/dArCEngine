@@ -1,6 +1,7 @@
 #pragma once
 #include "../../RHI/DynamicRHI.h"
 #include "../../LLAL/Platform.h"
+#include "VulkanDevice.h"
 
 #include <vector>
 
@@ -17,6 +18,9 @@ public:
     /** Setup vulkan instance */
     void InitInstance();
 
+    /** Select the physical device we use */
+    VulkanDevice PickDevice();
+
     /** Collect layers need to be enabled */
     void CollectLayers(std::vector<const char*>& out_layers);
 
@@ -25,7 +29,7 @@ public:
 
 private:
     /** We only keep 1 vulkan instance per RHI instance */
-    std::shared_ptr<vk::raii::Instance> instance_ = nullptr;
+    vk::raii::Instance instance_ = nullptr;
 
     /** flags */
     bool use_validation_layer = false;

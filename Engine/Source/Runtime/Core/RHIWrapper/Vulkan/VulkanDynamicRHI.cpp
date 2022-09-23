@@ -7,6 +7,7 @@ VulkanDynamicRHI::~VulkanDynamicRHI() {
 
 void VulkanDynamicRHI::Init() {
     InitInstance();
+    PickDevice();
 }
 
 void VulkanDynamicRHI::PostInit() {
@@ -40,6 +41,26 @@ void VulkanDynamicRHI::InitInstance() {
                 extensions.data()
         );
         // : Create vulkan instance
-        instance_ = std::make_shared<vk::raii::Instance>(context, instanceCreateInfo);
+        instance_ = vk::raii::Instance(context, instanceCreateInfo);
     }
+}
+
+VulkanDevice VulkanDynamicRHI::PickDevice() {
+    vk::raii::PhysicalDevices physicalDevices(instance_);
+    spdlog::info("[VulkanRHI] Found {} devices.", physicalDevices.size());
+
+    for (const vk::raii::PhysicalDevice& pDevice : physicalDevices) {
+        vk::PhysicalDeviceProperties prop = pDevice.getProperties();
+        // don't select cpu
+        if (prop.deviceType == vk::PhysicalDeviceType::eOther || prop.deviceType == vk::PhysicalDeviceType::eCpu)
+            continue;
+        // TODO: check limits
+
+        // check queue
+        auto queueProps = pDevice.getQueueFamilyProperties();
+        for (const vk::QueueFamilyProperties& queueProp : queueProps) {
+        }
+    }
+
+    return {this, vk::PhysicalDevice()};
 }

@@ -18,6 +18,8 @@ add_compile_definitions(
         $<$<CONFIG:DEBUG>:ENABLE_VALIDATION_LAYER=1>
 )
 
+include(External/cmake/GlobalDefines.cmake)
+
 link_directories(${GLOBAL_OUTPUT_PATH})
 
 add_subdirectory(Engine)
