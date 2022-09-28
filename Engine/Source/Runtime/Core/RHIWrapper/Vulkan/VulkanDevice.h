@@ -6,10 +6,11 @@ class VulkanDynamicRHI;
 class VulkanDevice final {
 
 public:
-    VulkanDevice(VulkanDynamicRHI* rhi, vk::PhysicalDevice physicalDevice);
+    VulkanDevice() = delete;
+    VulkanDevice(VulkanDynamicRHI* rhi, vk::raii::PhysicalDevice physicalDevice);
 
 private:
     VulkanDynamicRHI* rhi;
-    vk::PhysicalDevice physicalHandle;
+    vk::raii::PhysicalDevice physicalHandle;
 
 };

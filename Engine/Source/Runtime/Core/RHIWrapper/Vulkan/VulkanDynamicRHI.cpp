@@ -1,4 +1,6 @@
 #include "VulkanDynamicRHI.h"
+#include "VulkanQueue.h"
+#include "../../Misc/Assert.h"
 #include "spdlog/spdlog.h"
 
 VulkanDynamicRHI::~VulkanDynamicRHI() {
@@ -7,7 +9,7 @@ VulkanDynamicRHI::~VulkanDynamicRHI() {
 
 void VulkanDynamicRHI::Init() {
     InitInstance();
-    PickDevice();
+    device_ = PickDevice();
 }
 
 void VulkanDynamicRHI::PostInit() {
@@ -48,6 +50,7 @@ void VulkanDynamicRHI::InitInstance() {
 VulkanDevice VulkanDynamicRHI::PickDevice() {
     vk::raii::PhysicalDevices physicalDevices(instance_);
     spdlog::info("[VulkanRHI] Found {} devices.", physicalDevices.size());
+    std::optional<vk::raii::PhysicalDevice> selectedDevice;
 
     for (const vk::raii::PhysicalDevice& pDevice : physicalDevices) {
         vk::PhysicalDeviceProperties prop = pDevice.getProperties();
@@ -55,12 +58,13 @@ VulkanDevice VulkanDynamicRHI::PickDevice() {
         if (prop.deviceType == vk::PhysicalDeviceType::eOther || prop.deviceType == vk::PhysicalDeviceType::eCpu)
             continue;
         // TODO: check limits
-
-        // check queue
-        auto queueProps = pDevice.getQueueFamilyProperties();
-        for (const vk::QueueFamilyProperties& queueProp : queueProps) {
+        if (!DeviceQueueIndices::NewQueueIndices(pDevice).IsValid()) {
+            continue;
         }
+
+        selectedDevice = pDevice;
     }
 
-    return {this, vk::PhysicalDevice()};
+    ensure(selectedDevice.has_value(), "[VulkanDynamicRHI::PickDevice] No compatible device was found.");
+    return {this, selectedDevice.value()};
 }
