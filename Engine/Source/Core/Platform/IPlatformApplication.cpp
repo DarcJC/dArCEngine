@@ -13,12 +13,14 @@ bool darc::IPlatformApplication::init_window() {
     };
 
     auto create_window = [this](){
-        int windowFlag = 0;
+        // TODO: Dynamic check graphic api support
+        int windowFlag = SDL_WindowFlags::SDL_WINDOW_VULKAN
+                | SDL_WindowFlags::SDL_WINDOW_ALLOW_HIGHDPI;
 
         auto window = SDL_CreateWindow(name_.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1280, 760, windowFlag);
 
         if (!window) {
-            spdlog::error("Failed to create window: %s\n", SDL_GetError());
+            spdlog::error("Failed to create window: {}\n", SDL_GetError());
             return false;
         }
 
@@ -48,13 +50,13 @@ void darc::IPlatformApplication::start() {
 
     SDL_SetMainReady();
 
-    // start tmp debug
-    rhi.Init();
-    // end tmp debug
+    // try init engine
+    engine_ = Engine(main_window_);
 
     // do tick
     while (is_running) {
         tick();
+        engine_->update(0); // TODO calc delta time
     }
 
     // do clean

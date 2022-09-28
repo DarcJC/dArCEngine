@@ -1,3 +1,17 @@
 #pragma once
+#include "Core/Core.h"
+#include <optional>
+#include <SDL.h>
 
-int test() { return 123; }
+class Engine final {
+
+private:
+    DynamicRHI* rhi_;
+
+public:
+
+    Engine(SDL_Window* window);
+
+    void update(u32 deltaTime);
+
+};

@@ -3,6 +3,9 @@
 #include "../../Misc/Assert.h"
 #include "spdlog/spdlog.h"
 
+VulkanDynamicRHI::VulkanDynamicRHI(SDL_Window* window) : sdl_window_(window) {
+}
+
 VulkanDynamicRHI::~VulkanDynamicRHI() {
     ;
 }
@@ -16,6 +19,9 @@ void VulkanDynamicRHI::PostInit() {
 }
 
 void VulkanDynamicRHI::Shutdown() {
+}
+
+void VulkanDynamicRHI::Tick(u32 deltaTime) {
 }
 
 void VulkanDynamicRHI::InitInstance() {

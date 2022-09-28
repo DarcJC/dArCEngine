@@ -7,10 +7,15 @@ struct AssertWrapper {
 };
 
 template<typename... Args>
+TRYINLINE void fatal(spdlog::format_string_t<Args...> fmt, Args &&... args) {
+    spdlog::error(fmt, std::forward<Args>(args)...);
+    exit(1);
+}
+
+template<typename... Args>
 TRYINLINE void ensure(bool exp, spdlog::format_string_t<Args...> fmt, Args &&... args) {
     [[unlikely]]
     if (!exp) {
-        spdlog::error(fmt, std::forward<Args>(args)...);
-        exit(1);
+        fatal(fmt, std::forward<Args>(args)...);
     }
 }

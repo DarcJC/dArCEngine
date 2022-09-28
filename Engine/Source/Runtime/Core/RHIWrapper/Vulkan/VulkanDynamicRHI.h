@@ -5,16 +5,20 @@
 
 #include <vector>
 #include <optional>
+#include "SDL.h"
 
 class VulkanDynamicRHI : public DynamicRHI {
 
 public:
 
+    explicit VulkanDynamicRHI(SDL_Window* window);
     ~VulkanDynamicRHI() override;
 
     void Init() override;
     void PostInit() override;
     void Shutdown() override;
+
+    void Tick(u32 deltaTime) override;
 
     /** Setup vulkan instance */
     void InitInstance();
@@ -34,6 +38,9 @@ private:
 
     /** wrapped device */
     std::optional<VulkanDevice> device_;
+
+    /** SDL window */
+    SDL_Window* sdl_window_;
 
     /** flags */
     bool use_validation_layer = false;

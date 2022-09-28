@@ -1,6 +1,7 @@
 #include "VulkanDynamicRHI.h"
-#include "spdlog/spdlog.h"
 #include "../../Misc/Assert.h"
+#include "spdlog/spdlog.h"
+#include "SDL_vulkan.h"
 
 void VulkanDynamicRHI::CollectLayers(std::vector<const char*>& out_layers) {
 #ifdef ENABLE_VALIDATION_LAYER
@@ -35,4 +36,13 @@ void VulkanDynamicRHI::CollectLayers(std::vector<const char*>& out_layers) {
 }
 
 void VulkanDynamicRHI::CollectExtensions(std::vector<const char*>& out_exts) {
+#ifdef ENABLE_VALIDATION_LAYER
+    out_exts.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+#endif // ENABLE_VALIDATION_LAYER
+
+    // get sdl required
+    u32 sdl_ext_count;
+    ensure(SDL_Vulkan_GetInstanceExtensions(sdl_window_, &sdl_ext_count, nullptr) == SDL_TRUE, "[VulkanDynamicRHI::CollectExtensions] failed to get vulkan extension for sdl.");
+    out_exts.reserve(out_exts.size() + sdl_ext_count);
+    ensure(SDL_Vulkan_GetInstanceExtensions(sdl_window_, &sdl_ext_count, out_exts.data()) == SDL_TRUE, "[VulkanDynamicRHI::CollectExtensions] failed to get vulkan extension for sdl.");
 }
