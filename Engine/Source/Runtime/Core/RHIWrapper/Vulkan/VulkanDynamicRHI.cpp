@@ -1,7 +1,49 @@
-#include "VulkanDynamicRHI.h"
+#define VULKAN_HPP_DISPATCH_LOADER_DYNAMIC 1
+
 #include "VulkanQueue.h"
 #include "../../Misc/Assert.h"
 #include "spdlog/spdlog.h"
+#include "VulkanDynamicRHI.h"
+
+VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
+
+/**
+ * Vulkan debug message callback function
+ */
+static VKAPI_ATTR VkBool32 VKAPI_CALL debugMessageCallback(
+        VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+        VkDebugUtilsMessageTypeFlagsEXT messageType,
+        const VkDebugUtilsMessengerCallbackDataEXT* callbackData,
+        void* userdata) {
+    ensure(nullptr != callbackData, "[debugMessageCallback] callback data must valid");
+
+    if (messageSeverity <= VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT) {
+        spdlog::debug("[{}] {}", string_VkDebugUtilsMessageTypeFlagsEXT(messageType), callbackData->pMessage);
+    } else if (messageSeverity <= VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT) {
+        spdlog::info("[{}] {}", string_VkDebugUtilsMessageTypeFlagsEXT(messageType), callbackData->pMessage);
+    } else if (messageSeverity <= VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) {
+        spdlog::warn("[{}] {}", string_VkDebugUtilsMessageTypeFlagsEXT(messageType), callbackData->pMessage);
+    } else if (messageSeverity <= VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) {
+        spdlog::error("[{}] {}", string_VkDebugUtilsMessageTypeFlagsEXT(messageType), callbackData->pMessage);
+    } else {
+        spdlog::critical("[{}] {}", string_VkDebugUtilsMessageTypeFlagsEXT(messageType), callbackData->pMessage);
+    }
+
+    return VK_FALSE;
+}
+
+/** Create a new debug messenger create info */
+vk::DebugUtilsMessengerCreateInfoEXT newDebugMessengerCreateInfo() {
+    vk::DebugUtilsMessengerCreateInfoEXT info {
+            vk::DebugUtilsMessengerCreateFlagsEXT(),
+            vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose | vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo | vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning | vk::DebugUtilsMessageSeverityFlagBitsEXT::eError,
+            vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral | vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation | vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance,
+            debugMessageCallback,
+            nullptr
+    };
+
+    return info;
+}
 
 VulkanDynamicRHI::VulkanDynamicRHI(SDL_Window* window) : sdl_window_(window) {
 }
@@ -48,8 +90,29 @@ void VulkanDynamicRHI::InitInstance() {
                 extensions.size(),
                 extensions.data()
         );
+#ifdef ENABLE_VALIDATION_LAYER
+        std::optional<vk::DebugUtilsMessengerCreateInfoEXT> debugMessengerCreateInfo; /** must in lifetime before create instance finished */
+        if (use_validation_layer) {
+            debugMessengerCreateInfo = newDebugMessengerCreateInfo();
+            instanceCreateInfo.pNext = &debugMessengerCreateInfo.value();
+        }
+#endif // ENABLE_VALIDATION_LAYER
         // : Create vulkan instance
         instance_ = vk::raii::Instance(context, instanceCreateInfo);
+    }
+    // Setup dynamic dispatcher
+    {
+        vk::DynamicLoader loader;
+        auto vkGetInstanceProcAddr = loader.getProcAddress<PFN_vkGetInstanceProcAddr>("vkGetInstanceProcAddr");
+        VULKAN_HPP_DEFAULT_DISPATCHER.init(vkGetInstanceProcAddr);
+        VULKAN_HPP_DEFAULT_DISPATCHER.init( *instance_);
+    }
+    // Setup validation layer
+    {
+#ifdef ENABLE_VALIDATION_LAYER
+        auto createInfo = newDebugMessengerCreateInfo();
+        debug_utils_messenger_ = instance_.createDebugUtilsMessengerEXT(createInfo);
+#endif // ENABLE_VALIDATION_LAYER
     }
 }
 

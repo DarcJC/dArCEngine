@@ -8,7 +8,7 @@ struct AssertWrapper {
 
 template<typename... Args>
 TRYINLINE void fatal(spdlog::format_string_t<Args...> fmt, Args &&... args) {
-    spdlog::error(fmt, std::forward<Args>(args)...);
+    spdlog::critical(fmt, std::forward<Args>(args)...);
     exit(1);
 }
 

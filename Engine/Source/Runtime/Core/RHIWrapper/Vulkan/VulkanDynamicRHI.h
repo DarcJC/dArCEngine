@@ -1,11 +1,16 @@
 #pragma once
+
 #include "../../RHI/DynamicRHI.h"
 #include "../../LLAL/Platform.h"
+#include "../../Misc/Assert.h"
 #include "VulkanDevice.h"
 
 #include <vector>
 #include <optional>
 #include "SDL.h"
+#include "vulkan/vulkan_raii.hpp"
+#include "vulkan/vk_enum_string_helper.h"
+#include "spdlog/spdlog.h"
 
 class VulkanDynamicRHI : public DynamicRHI {
 
@@ -38,6 +43,9 @@ private:
 
     /** wrapped device */
     std::optional<VulkanDevice> device_;
+
+    /** keep debug messenger in lifetime */
+    std::optional<vk::raii::DebugUtilsMessengerEXT> debug_utils_messenger_;
 
     /** SDL window */
     SDL_Window* sdl_window_;

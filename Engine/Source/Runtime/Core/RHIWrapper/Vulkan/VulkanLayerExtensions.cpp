@@ -41,8 +41,9 @@ void VulkanDynamicRHI::CollectExtensions(std::vector<const char*>& out_exts) {
 #endif // ENABLE_VALIDATION_LAYER
 
     // get sdl required
+    u32 current_count = out_exts.size();
     u32 sdl_ext_count;
     ensure(SDL_Vulkan_GetInstanceExtensions(sdl_window_, &sdl_ext_count, nullptr) == SDL_TRUE, "[VulkanDynamicRHI::CollectExtensions] failed to get vulkan extension for sdl.");
-    out_exts.reserve(out_exts.size() + sdl_ext_count);
-    ensure(SDL_Vulkan_GetInstanceExtensions(sdl_window_, &sdl_ext_count, out_exts.data()) == SDL_TRUE, "[VulkanDynamicRHI::CollectExtensions] failed to get vulkan extension for sdl.");
+    out_exts.resize(current_count + sdl_ext_count);
+    ensure(SDL_Vulkan_GetInstanceExtensions(sdl_window_, &sdl_ext_count, out_exts.data() + current_count) == SDL_TRUE, "[VulkanDynamicRHI::CollectExtensions] failed to get vulkan extension for sdl.");
 }
