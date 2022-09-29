@@ -1,11 +1,7 @@
-#define VULKAN_HPP_DISPATCH_LOADER_DYNAMIC 1
-
 #include "VulkanQueue.h"
 #include "../../Misc/Assert.h"
 #include "spdlog/spdlog.h"
 #include "VulkanDynamicRHI.h"
-
-VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
 
 /**
  * Vulkan debug message callback function
@@ -99,13 +95,6 @@ void VulkanDynamicRHI::InitInstance() {
 #endif // ENABLE_VALIDATION_LAYER
         // : Create vulkan instance
         instance_ = vk::raii::Instance(context, instanceCreateInfo);
-    }
-    // Setup dynamic dispatcher
-    {
-        vk::DynamicLoader loader;
-        auto vkGetInstanceProcAddr = loader.getProcAddress<PFN_vkGetInstanceProcAddr>("vkGetInstanceProcAddr");
-        VULKAN_HPP_DEFAULT_DISPATCHER.init(vkGetInstanceProcAddr);
-        VULKAN_HPP_DEFAULT_DISPATCHER.init( *instance_);
     }
     // Setup validation layer
     {
