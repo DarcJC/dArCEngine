@@ -53,7 +53,7 @@ void VulkanDynamicRHI::Init() {
     InitInstance();
     InitSurface();
     device_ = PickDevice();
-    device_->init();
+    device_->Init();
 }
 
 void VulkanDynamicRHI::PostInit() {
@@ -125,6 +125,9 @@ VulkanDevice VulkanDynamicRHI::PickDevice() {
             continue;
         // TODO: check limits
         if (!DeviceQueueIndices::NewQueueIndices(pDevice, surface_.get()).IsValid()) {
+            continue;
+        }
+        if (!VulkanDevice::CheckDevice(pDevice)) {
             continue;
         }
 

@@ -1,18 +1,17 @@
 #include "VulkanDevice.h"
+#include "VulkanDynamicRHI.h"
 
 #include <utility>
 #include <set>
-#include "../../Misc/Assert.h"
-#include "../../LLAL/Platform.h"
 
 VulkanDevice::VulkanDevice(VulkanDynamicRHI *inRHI, vk::raii::PhysicalDevice inHandle)
-    : rhi(inRHI)
+    : rhi_(inRHI)
     , physicalHandle(std::move(inHandle)) {
     ensure(nullptr != inRHI, "[VulkanDevice::VulkanDevice] RHI pointer should not be null");
 }
 
-void VulkanDevice::init() {
-    simple_queue_indices_ = DeviceQueueIndices::NewQueueIndices(physicalHandle);
+void VulkanDevice::Init() {
+    simple_queue_indices_ = DeviceQueueIndices::NewQueueIndices(physicalHandle, rhi_->GetSurface()->get());
 
     std::set<u32> uniqueQueueFamilies { simple_queue_indices_->graphic.value(), simple_queue_indices_->present.value() };
     std::vector<vk::DeviceQueueCreateInfo> queues;
@@ -28,7 +27,8 @@ void VulkanDevice::init() {
             });
     }
 
-    std::vector<const char*> layers, exts;
+    std::vector<const char*> layers, exts; // layers is ignored by up-to-date implementations
+    CollectExtensions(exts);
 
     vk::PhysicalDeviceFeatures features;
     features.setGeometryShader(true);
@@ -62,3 +62,23 @@ void VulkanDevice::init() {
     presentQueue = device_->getQueue(simple_queue_indices_->present.value(), 0);
 
 }
+
+void VulkanDevice::CollectExtensions(std::vector<const char*>& outExt) {
+    outExt.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+}
+
+bool VulkanDevice::CheckDevice(const vk::raii::PhysicalDevice& physicalDevice) {
+    // extensions device supported
+    std::vector<vk::ExtensionProperties> deviceSupportedExts = physicalDevice.enumerateDeviceExtensionProperties();
+    // extensions we needed
+    std::vector<const char*> requiredExts;
+    CollectExtensions(requiredExts);
+    std::set<std::string> requiredExtsUnique(requiredExts.begin(), requiredExts.end());
+    // check
+    for (const auto& extProp : deviceSupportedExts) {
+        requiredExtsUnique.erase(extProp.extensionName);
+    }
+
+    return requiredExtsUnique.empty();
+}
+

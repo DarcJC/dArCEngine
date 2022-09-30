@@ -64,6 +64,7 @@ private:
     bool use_validation_layer = false;
 
 public:
+    vk::UniqueSurfaceKHR* GetSurface() { return &surface_; }
 
 private:
 

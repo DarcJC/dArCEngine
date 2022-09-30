@@ -12,13 +12,17 @@ public:
     VulkanDevice() = delete;
     VulkanDevice(VulkanDynamicRHI* rhi, vk::raii::PhysicalDevice physicalDevice);
 
-    void init();
+    void Init();
+
+    static void CollectExtensions(std::vector<const char*>& outExt);
+
+    static bool CheckDevice(const vk::raii::PhysicalDevice& physicalDevice);
 
 private:
     /**
      * Handles
      */
-    VulkanDynamicRHI* rhi;
+    VulkanDynamicRHI* rhi_;
     /** Vulkan handle of GPU */
     vk::raii::PhysicalDevice physicalHandle;
     /** Logical device in vulkan */
