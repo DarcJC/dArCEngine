@@ -1,5 +1,8 @@
 #pragma once
+
+#include <csignal>
 #include "spdlog/spdlog.h"
+#include "debug-trap/debug-trap.h"
 
 template<typename T, bool fatal>
 struct AssertWrapper {
@@ -9,7 +12,8 @@ struct AssertWrapper {
 template<typename... Args>
 TRYINLINE void fatal(spdlog::format_string_t<Args...> fmt, Args &&... args) {
     spdlog::critical(fmt, std::forward<Args>(args)...);
-    exit(1);
+    psnip_trap();
+    exit(SIGABRT);
 }
 
 template<typename... Args>
