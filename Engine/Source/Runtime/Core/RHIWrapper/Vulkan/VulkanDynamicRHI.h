@@ -37,6 +37,9 @@ public:
     /** Collect extensions need to be enabled */
     void CollectExtensions(std::vector<const char*>& out_exts);
 
+    /** Create vulkan surface */
+    void InitSurface();
+
 private:
     /** We only keep 1 vulkan instance per RHI instance */
     vk::raii::Instance instance_ = nullptr;
@@ -49,6 +52,13 @@ private:
 
     /** SDL window */
     SDL_Window* sdl_window_;
+
+    /**
+     * Surface\n
+     * Surface is creating by SDL library.\n
+     * Releasing in by ourselves following RAII pattern.
+     */
+    std::optional<vk::SurfaceKHR> surface_;
 
     /** flags */
     bool use_validation_layer = false;

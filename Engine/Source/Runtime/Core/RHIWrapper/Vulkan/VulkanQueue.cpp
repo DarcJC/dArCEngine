@@ -24,5 +24,20 @@ DeviceQueueIndices DeviceQueueIndices::NewQueueIndices(const vk::raii::PhysicalD
 }
 
 bool DeviceQueueIndices::IsValid() const {
-    return graphic.has_value();
+    return graphic.has_value() && present.has_value();
+}
+
+DeviceQueueIndices
+DeviceQueueIndices::NewQueueIndices(const vk::raii::PhysicalDevice &device, const vk::SurfaceKHR& surface) {
+    DeviceQueueIndices indices = NewQueueIndices(device);
+
+    auto queueProps = device.getQueueFamilyProperties();
+    for (auto it = queueProps.begin(); it <= queueProps.end(); ++it) {
+        if ( VK_TRUE == device.getSurfaceSupportKHR(std::distance(queueProps.begin(), it), surface) ) {
+            indices.present = std::distance(queueProps.begin(), it);
+            break;
+        }
+    }
+
+    return indices;
 }

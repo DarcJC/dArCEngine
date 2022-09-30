@@ -2,6 +2,7 @@
 #include "../../Misc/Assert.h"
 #include "spdlog/spdlog.h"
 #include "VulkanDynamicRHI.h"
+#include "SDL_vulkan.h"
 
 /**
  * Vulkan debug message callback function
@@ -50,7 +51,9 @@ VulkanDynamicRHI::~VulkanDynamicRHI() {
 
 void VulkanDynamicRHI::Init() {
     InitInstance();
+    InitSurface();
     device_ = PickDevice();
+    device_->init();
 }
 
 void VulkanDynamicRHI::PostInit() {
@@ -116,7 +119,7 @@ VulkanDevice VulkanDynamicRHI::PickDevice() {
         if (prop.deviceType == vk::PhysicalDeviceType::eOther || prop.deviceType == vk::PhysicalDeviceType::eCpu)
             continue;
         // TODO: check limits
-        if (!DeviceQueueIndices::NewQueueIndices(pDevice).IsValid()) {
+        if (!DeviceQueueIndices::NewQueueIndices(pDevice, surface_.value()).IsValid()) {
             continue;
         }
 
@@ -125,4 +128,10 @@ VulkanDevice VulkanDynamicRHI::PickDevice() {
 
     ensure(selectedDevice.has_value(), "[VulkanDynamicRHI::PickDevice] No compatible device was found.");
     return {this, selectedDevice.value()};
+}
+
+void VulkanDynamicRHI::InitSurface() {
+    VkSurfaceKHR surface;
+    ensure(SDL_Vulkan_CreateSurface(sdl_window_, *instance_, &surface) == VK_TRUE, "[VulkanDynamicRHI::InitSurface] failed to create vulkan surface.");
+    surface_ = vk::SurfaceKHR(surface);
 }
