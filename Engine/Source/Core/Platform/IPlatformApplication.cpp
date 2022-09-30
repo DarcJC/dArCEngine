@@ -84,4 +84,5 @@ void darc::IPlatformApplication::handle_window_input() {
 
 void darc::IPlatformApplication::clean() {
     spdlog::info("Clearing...");
+    engine_->destroy();
 }

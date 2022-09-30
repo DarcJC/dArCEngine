@@ -60,6 +60,11 @@ void VulkanDynamicRHI::PostInit() {
 }
 
 void VulkanDynamicRHI::Shutdown() {
+    device_ = std::nullopt;
+    if (nullptr != sdl_window_) SDL_DestroyWindow(sdl_window_);
+    vkDestroySurfaceKHR(*instance_, VkSurfaceKHR(surface_.release()), nullptr);
+    debug_utils_messenger_ = std::nullopt;
+    instance_ = nullptr;
 }
 
 void VulkanDynamicRHI::Tick(u32 deltaTime) {
@@ -119,7 +124,7 @@ VulkanDevice VulkanDynamicRHI::PickDevice() {
         if (prop.deviceType == vk::PhysicalDeviceType::eOther || prop.deviceType == vk::PhysicalDeviceType::eCpu)
             continue;
         // TODO: check limits
-        if (!DeviceQueueIndices::NewQueueIndices(pDevice, surface_.value()).IsValid()) {
+        if (!DeviceQueueIndices::NewQueueIndices(pDevice, surface_.get()).IsValid()) {
             continue;
         }
 
@@ -133,5 +138,5 @@ VulkanDevice VulkanDynamicRHI::PickDevice() {
 void VulkanDynamicRHI::InitSurface() {
     VkSurfaceKHR surface;
     ensure(SDL_Vulkan_CreateSurface(sdl_window_, *instance_, &surface) == VK_TRUE, "[VulkanDynamicRHI::InitSurface] failed to create vulkan surface.");
-    surface_ = vk::SurfaceKHR(surface);
+    surface_ = vk::UniqueSurfaceKHR(vk::SurfaceKHR(surface));
 }

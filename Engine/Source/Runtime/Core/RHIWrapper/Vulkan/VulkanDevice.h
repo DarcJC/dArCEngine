@@ -29,5 +29,6 @@ private:
      */
     std::optional<DeviceQueueIndices> simple_queue_indices_;
     std::optional<vk::raii::Queue> graphicQueue;
+    std::optional<vk::raii::Queue> presentQueue;
 
 };

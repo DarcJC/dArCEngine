@@ -58,7 +58,7 @@ private:
      * Surface is creating by SDL library.\n
      * Releasing in by ourselves following RAII pattern.
      */
-    std::optional<vk::SurfaceKHR> surface_;
+    vk::UniqueSurfaceKHR surface_;
 
     /** flags */
     bool use_validation_layer = false;

@@ -10,8 +10,9 @@ private:
 
 public:
 
-    Engine(SDL_Window* window);
+    explicit Engine(SDL_Window* window);
 
     void update(u32 deltaTime);
+    void destroy();
 
 };

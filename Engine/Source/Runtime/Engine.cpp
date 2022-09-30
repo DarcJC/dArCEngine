@@ -10,3 +10,7 @@ Engine::Engine(SDL_Window* window) {
 void Engine::update(u32 deltaTime) {
     rhi_->Tick(deltaTime);
 }
+
+void Engine::destroy() {
+    rhi_->Shutdown();
+}
