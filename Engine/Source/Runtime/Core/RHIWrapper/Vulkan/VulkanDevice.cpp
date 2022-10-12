@@ -67,7 +67,7 @@ void VulkanDevice::CollectExtensions(std::vector<const char*>& outExt) {
     outExt.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
 }
 
-bool VulkanDevice::CheckDevice(const vk::raii::PhysicalDevice& physicalDevice) {
+bool VulkanDevice::CheckDevice(const vk::raii::PhysicalDevice& physicalDevice, vk::UniqueSurfaceKHR& surface) {
     // extensions device supported
     std::vector<vk::ExtensionProperties> deviceSupportedExts = physicalDevice.enumerateDeviceExtensionProperties();
     // extensions we needed
@@ -79,6 +79,11 @@ bool VulkanDevice::CheckDevice(const vk::raii::PhysicalDevice& physicalDevice) {
         requiredExtsUnique.erase(extProp.extensionName);
     }
 
-    return requiredExtsUnique.empty();
+    // check swapchain support
+    std::vector<vk::SurfaceFormatKHR> formats = physicalDevice.getSurfaceFormatsKHR(surface.get());
+    std::vector<vk::PresentModeKHR> presentModes = physicalDevice.getSurfacePresentModesKHR(surface.get());
+
+    return requiredExtsUnique.empty() &&
+        !formats.empty() && !presentModes.empty();
 }
 

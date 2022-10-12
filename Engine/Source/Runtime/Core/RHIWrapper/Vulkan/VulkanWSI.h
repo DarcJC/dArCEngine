@@ -7,14 +7,16 @@ class VulkanDynamicRHI;
 
 struct SwapchainSupport {
     vk::SurfaceCapabilitiesKHR capabilities;
-    std::vector<vk::SurfaceFormatKHR> formats;
-    std::vector<vk::PresentModeKHR> present_modes;
+    std::optional<std::vector<vk::SurfaceFormatKHR>> formats;
+    std::optional<std::vector<vk::PresentModeKHR>> present_modes;
 };
 
 class VulkanDisplay {
 
 private:
     VulkanDynamicRHI* rhi_;
+
+    SwapchainSupport swapchainDetail;
 
 public:
     explicit VulkanDisplay(VulkanDynamicRHI* rhi) : rhi_(rhi) {

@@ -16,7 +16,7 @@ public:
 
     static void CollectExtensions(std::vector<const char*>& outExt);
 
-    static bool CheckDevice(const vk::raii::PhysicalDevice& physicalDevice);
+    static bool CheckDevice(const vk::raii::PhysicalDevice& physicalDevice, vk::UniqueSurfaceKHR& surface);
 
 private:
     /**
@@ -34,5 +34,9 @@ private:
     std::optional<DeviceQueueIndices> simple_queue_indices_;
     std::optional<vk::raii::Queue> graphicQueue;
     std::optional<vk::raii::Queue> presentQueue;
+
+public:
+    vk::raii::PhysicalDevice& GetPhysicalDevice() { return physicalHandle; }
+    vk::raii::Device& GetLogicalDevice() { return device_.value(); }
 
 };

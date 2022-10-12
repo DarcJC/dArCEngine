@@ -54,6 +54,7 @@ void VulkanDynamicRHI::Init() {
     InitSurface();
     device_ = PickDevice();
     device_->Init();
+    InitDisplay();
 }
 
 void VulkanDynamicRHI::PostInit() {
@@ -127,7 +128,7 @@ VulkanDevice VulkanDynamicRHI::PickDevice() {
         if (!DeviceQueueIndices::NewQueueIndices(pDevice, surface_.get()).IsValid()) {
             continue;
         }
-        if (!VulkanDevice::CheckDevice(pDevice)) {
+        if (!VulkanDevice::CheckDevice(pDevice, surface_)) {
             continue;
         }
 
@@ -142,4 +143,9 @@ void VulkanDynamicRHI::InitSurface() {
     VkSurfaceKHR surface;
     ensure(SDL_Vulkan_CreateSurface(sdl_window_, *instance_, &surface) == VK_TRUE, "[VulkanDynamicRHI::InitSurface] failed to create vulkan surface.");
     surface_ = vk::UniqueSurfaceKHR(vk::SurfaceKHR(surface));
+}
+
+void VulkanDynamicRHI::InitDisplay() {
+    display_ = VulkanDisplay(this);
+    display_->Init();
 }

@@ -4,6 +4,7 @@
 #include "../../LLAL/Platform.h"
 #include "../../Misc/Assert.h"
 #include "VulkanDevice.h"
+#include "VulkanWSI.h"
 
 #include <vector>
 #include <optional>
@@ -40,12 +41,18 @@ public:
     /** Create vulkan surface */
     void InitSurface();
 
+    /** Init Vulkan display layer */
+    void InitDisplay();
+
 private:
     /** We only keep 1 vulkan instance per RHI instance */
     vk::raii::Instance instance_ = nullptr;
 
     /** wrapped device */
     std::optional<VulkanDevice> device_;
+
+    /** display wrapper */
+    std::optional<VulkanDisplay> display_;
 
     /** keep debug messenger in lifetime */
     std::optional<vk::raii::DebugUtilsMessengerEXT> debug_utils_messenger_;
@@ -64,7 +71,11 @@ private:
     bool use_validation_layer = false;
 
 public:
-    vk::UniqueSurfaceKHR* GetSurface() { return &surface_; }
+    const vk::UniqueSurfaceKHR* GetSurface() { return &surface_; }
+
+    VulkanDevice& GetWrappedDevice() { return device_.value(); }
+
+    VulkanDisplay& GetWrappedDisplay() { return display_.value(); }
 
 private:
 
