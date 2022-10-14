@@ -61,6 +61,7 @@ void VulkanDynamicRHI::PostInit() {
 }
 
 void VulkanDynamicRHI::Shutdown() {
+    display_ = std::nullopt;
     device_ = std::nullopt;
     if (nullptr != sdl_window_) SDL_DestroyWindow(sdl_window_);
     vkDestroySurfaceKHR(*instance_, VkSurfaceKHR(surface_.release()), nullptr);

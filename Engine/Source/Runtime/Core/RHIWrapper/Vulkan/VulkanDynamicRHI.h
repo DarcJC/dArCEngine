@@ -77,6 +77,8 @@ public:
 
     VulkanDisplay& GetWrappedDisplay() { return display_.value(); }
 
+    SDL_Window* GetSDLWindow() { return sdl_window_; }
+
 private:
 
 };
