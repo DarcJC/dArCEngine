@@ -26,6 +26,8 @@ private:
     vk::Extent2D swapchainExtent;
     vk::SurfaceFormatKHR surfaceFormat;
 
+    std::vector<vk::raii::ImageView> swapchainImageViews;
+
 public:
     explicit VulkanDisplay(VulkanDynamicRHI* rhi) : rhi_(rhi) {
         ensure(nullptr != rhi, "[VulkanDisplay] RHI object* should not be nullptr");

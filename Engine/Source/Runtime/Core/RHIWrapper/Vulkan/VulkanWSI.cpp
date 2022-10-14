@@ -3,65 +3,96 @@
 #include "VulkanWSI.h"
 
 void VulkanDisplay::Init() {
-    // prepare data
-    vk::SurfaceCapabilitiesKHR capabilities;
-    VkPhysicalDevice rawPhysicalDevice = *rhi_->GetWrappedDevice().GetPhysicalDevice();
-    auto rawSurface = (*const_cast<vk::UniqueSurfaceKHR *>(rhi_->GetSurface()))->operator VkSurfaceKHR();
-    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(rawPhysicalDevice, rawSurface, &swapchainDetail.capabilities.operator VkSurfaceCapabilitiesKHR &());
+    // create swapchain image
+    {
+        // prepare data
+        vk::SurfaceCapabilitiesKHR capabilities;
+        VkPhysicalDevice rawPhysicalDevice = *rhi_->GetWrappedDevice().GetPhysicalDevice();
+        auto rawSurface = (*const_cast<vk::UniqueSurfaceKHR *>(rhi_->GetSurface()))->operator VkSurfaceKHR();
+        vkGetPhysicalDeviceSurfaceCapabilitiesKHR(rawPhysicalDevice, rawSurface,
+                                                  &swapchainDetail.capabilities.operator VkSurfaceCapabilitiesKHR &());
 
-    auto& physicalDevice = rhi_->GetWrappedDevice().GetPhysicalDevice();
-    auto* surface = const_cast<vk::UniqueSurfaceKHR *>(rhi_->GetSurface());
+        auto &physicalDevice = rhi_->GetWrappedDevice().GetPhysicalDevice();
+        auto *surface = const_cast<vk::UniqueSurfaceKHR *>(rhi_->GetSurface());
 
-    swapchainDetail.formats = physicalDevice.getSurfaceFormatsKHR(surface->get());
-    swapchainDetail.present_modes = physicalDevice.getSurfacePresentModesKHR(surface->get());
+        swapchainDetail.formats = physicalDevice.getSurfaceFormatsKHR(surface->get());
+        swapchainDetail.present_modes = physicalDevice.getSurfacePresentModesKHR(surface->get());
 
-    surfaceFormat = PickSurfaceFormat(swapchainDetail.formats.value()).value();
-    vk::PresentModeKHR presentMode = PickPresentMode(swapchainDetail.present_modes.value()).value();
-    swapchainExtent = FetchSwapchainExtent(swapchainDetail.capabilities, rhi_->GetSDLWindow());
-    u32 imageCnt = swapchainDetail.capabilities.minImageCount + 1;
-    if (swapchainDetail.capabilities.maxImageCount > 0 && imageCnt > swapchainDetail.capabilities.maxImageCount) {
-        imageCnt = swapchainDetail.capabilities.maxImageCount;
+        surfaceFormat = PickSurfaceFormat(swapchainDetail.formats.value()).value();
+        vk::PresentModeKHR presentMode = PickPresentMode(swapchainDetail.present_modes.value()).value();
+        swapchainExtent = FetchSwapchainExtent(swapchainDetail.capabilities, rhi_->GetSDLWindow());
+        u32 imageCnt = swapchainDetail.capabilities.minImageCount + 1;
+        if (swapchainDetail.capabilities.maxImageCount > 0 && imageCnt > swapchainDetail.capabilities.maxImageCount) {
+            imageCnt = swapchainDetail.capabilities.maxImageCount;
+        }
+
+        // create info
+        vk::SwapchainCreateFlagsKHR flags;
+        vk::SwapchainCreateInfoKHR createInfo{
+                flags,
+                surface->get(),
+                imageCnt,
+                surfaceFormat.format,
+                surfaceFormat.colorSpace,
+                swapchainExtent,
+                1,
+                vk::ImageUsageFlagBits::eColorAttachment
+        };
+
+        // set to concurrent sharing mode
+        DeviceQueueIndices queueIndices = DeviceQueueIndices::NewQueueIndices(physicalDevice, surface->get());
+        u32 queueFamilyIndices[] = {queueIndices.graphic.value(), queueIndices.present.value()};
+
+        if (queueIndices.graphic != queueIndices.present) {
+            createInfo.setImageSharingMode(vk::SharingMode::eConcurrent);
+            createInfo.setQueueFamilyIndexCount(2);
+            createInfo.setPQueueFamilyIndices(queueFamilyIndices);
+        } else {
+            createInfo.setImageSharingMode(vk::SharingMode::eExclusive);
+            createInfo.setQueueFamilyIndexCount(0);
+            createInfo.setPQueueFamilyIndices(nullptr);
+        }
+
+        createInfo.setPreTransform(swapchainDetail.capabilities.currentTransform);
+        createInfo.setCompositeAlpha(vk::CompositeAlphaFlagBitsKHR::eOpaque);
+        createInfo.setPresentMode(presentMode);
+        createInfo.setClipped(VK_TRUE);
+
+        // TODO: recreate swapchain when window resized
+        createInfo.setOldSwapchain(VK_NULL_HANDLE);
+
+        auto &device = rhi_->GetWrappedDevice().GetLogicalDevice();
+        swapchain_ = device.createSwapchainKHR(createInfo);
+
+        swapchainImages = std::make_optional(swapchain_.getImages());
     }
 
-    // create info
-    vk::SwapchainCreateFlagsKHR flags;
-    vk::SwapchainCreateInfoKHR createInfo {
-        flags,
-        surface->get(),
-        imageCnt,
-        surfaceFormat.format,
-        surfaceFormat.colorSpace,
-        swapchainExtent,
-        1,
-        vk::ImageUsageFlagBits::eColorAttachment
-    };
-
-    // set to concurrent sharing mode
-    DeviceQueueIndices queueIndices = DeviceQueueIndices::NewQueueIndices(physicalDevice, surface->get());
-    u32 queueFamilyIndices[] = { queueIndices.graphic.value(), queueIndices.present.value() };
-
-    if (queueIndices.graphic != queueIndices.present) {
-        createInfo.setImageSharingMode(vk::SharingMode::eConcurrent);
-        createInfo.setQueueFamilyIndexCount(2);
-        createInfo.setPQueueFamilyIndices(queueFamilyIndices);
-    } else {
-        createInfo.setImageSharingMode(vk::SharingMode::eExclusive);
-        createInfo.setQueueFamilyIndexCount(0);
-        createInfo.setPQueueFamilyIndices(nullptr);
+    // create image view using image as texture
+    {
+        auto& device = rhi_->GetWrappedDevice().GetLogicalDevice();
+        for (u64 i : *swapchainImages) {
+            vk::ImageViewCreateInfo createInfo {
+                    vk::ImageViewCreateFlags(),
+                    vk::Image(i),
+                    vk::ImageViewType::e2D,
+                    surfaceFormat.format,
+                    vk::ComponentMapping {
+                        vk::ComponentSwizzle::eIdentity,
+                        vk::ComponentSwizzle::eIdentity,
+                        vk::ComponentSwizzle::eIdentity,
+                        vk::ComponentSwizzle::eIdentity
+                    },
+                    vk::ImageSubresourceRange {
+                        vk::ImageAspectFlagBits::eColor,
+                        0,
+                        1,
+                        0,
+                        1,
+                    },
+            };
+            swapchainImageViews.push_back(device.createImageView(createInfo));
+        }
     }
-
-    createInfo.setPreTransform(swapchainDetail.capabilities.currentTransform);
-    createInfo.setCompositeAlpha(vk::CompositeAlphaFlagBitsKHR::eOpaque);
-    createInfo.setPresentMode(presentMode);
-    createInfo.setClipped(VK_TRUE);
-
-    // TODO: recreate swapchain when window resized
-    createInfo.setOldSwapchain(VK_NULL_HANDLE);
-
-    auto& device = rhi_->GetWrappedDevice().GetLogicalDevice();
-    swapchain_ = device.createSwapchainKHR(createInfo);
-
-    swapchainImages = std::make_optional(swapchain_.getImages());
 }
 
 std::optional<vk::SurfaceFormatKHR> VulkanDisplay::PickSurfaceFormat(const std::vector<vk::SurfaceFormatKHR>& formats) {
