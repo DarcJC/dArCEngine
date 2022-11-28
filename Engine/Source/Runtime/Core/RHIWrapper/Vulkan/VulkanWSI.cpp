@@ -70,10 +70,10 @@ void VulkanDisplay::Init() {
     // create image view using image as texture
     {
         auto& device = rhi_->GetWrappedDevice().GetLogicalDevice();
-        for (u64 i : *swapchainImages) {
+        for (const vk::Image& i : *swapchainImages) {
             vk::ImageViewCreateInfo createInfo {
                     vk::ImageViewCreateFlags(),
-                    vk::Image(i),
+                    i,
                     vk::ImageViewType::e2D,
                     surfaceFormat.format,
                     vk::ComponentMapping {

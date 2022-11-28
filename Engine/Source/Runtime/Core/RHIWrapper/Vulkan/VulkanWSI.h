@@ -21,7 +21,7 @@ private:
 
     vk::raii::SwapchainKHR swapchain_ = VK_NULL_HANDLE;
 
-    std::optional<std::vector<VkImage>> swapchainImages;
+    std::optional<std::vector<vk::Image>> swapchainImages;
 
     vk::Extent2D swapchainExtent;
     vk::SurfaceFormatKHR surfaceFormat;
