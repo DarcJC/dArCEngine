@@ -6,3 +6,4 @@ cmake-build-debug-mingw/
 .vs/
 out/
 bin/
+Engine/3rdParty/SDL2
