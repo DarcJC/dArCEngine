@@ -1,9 +1,6 @@
 
 set(ENGINE_ROOT_DIR "${PROJECT_ROOT_DIR}/Engine")
 set(THIRD_PARTY_DIR "${ENGINE_ROOT_DIR}/3rdParty")
-# Shader dir
-set(SHADER_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Shaders)
-set(SHADER_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/Shaders)
 
 # Use Multi Processors
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
@@ -21,6 +18,8 @@ link_libraries(${Vulkan_LIBRARIES})
 message(STATUS "Vulkan Includes: ${Vulkan_INCLUDE_DIRS}, Link: ${Vulkan_LIBRARIES}, GLSLC: ${glslc_executable}")
 
 # Build shader
+set(SHADER_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Shaders)
+set(SHADER_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/Shaders)
 include(../External/cmake/BuildShader.cmake)
 
 # Subproject

@@ -49,6 +49,8 @@ VulkanDynamicRHI::~VulkanDynamicRHI() {
     ;
 }
 
+std::optional<VulkanDevice> VulkanDynamicRHI::device_ = std::nullopt;
+
 void VulkanDynamicRHI::Init() {
     InitInstance();
     InitSurface();

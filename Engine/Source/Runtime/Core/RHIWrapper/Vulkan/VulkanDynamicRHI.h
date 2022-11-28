@@ -49,7 +49,7 @@ private:
     vk::raii::Instance instance_ = nullptr;
 
     /** wrapped device */
-    std::optional<VulkanDevice> device_;
+    static std::optional<VulkanDevice> device_;
 
     /** display wrapper */
     std::optional<VulkanDisplay> display_;
@@ -73,7 +73,7 @@ private:
 public:
     const vk::UniqueSurfaceKHR* GetSurface() { return &surface_; }
 
-    VulkanDevice& GetWrappedDevice() { return device_.value(); }
+    static VulkanDevice& GetWrappedDevice() { return device_.value(); }
 
     VulkanDisplay& GetWrappedDisplay() { return display_.value(); }
 

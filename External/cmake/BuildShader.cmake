@@ -1,4 +1,9 @@
 
+# Add target to build static shaders
+# TODO: For the shaders generated at runtime, should use libshdaerc
+
+# Reading variable: SHADER_SOURCE_DIR, SHADER_BINARY_DIR
+
 find_package(Vulkan REQUIRED COMPONENTS glslc FATAL_ERROR)
 find_program(glslc_executable NAMES glslc HINTS Vulkan::glslc)
 
